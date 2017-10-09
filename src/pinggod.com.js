@@ -15,7 +15,7 @@ var fail = 0;
 var bar;
 
 // 删除历史文档, 创新创建
-var dir = './md/ruanyifeng.com';
+var dir = './md/pinggod.com';
 shelljs.rm('-rf', dir);
 shelljs.mkdir('-p', dir);
 
@@ -36,15 +36,15 @@ function writeMd(blog) {
 
 // 抓取列表
 var postsCrawler = new Crawler({
-  maxConnections: 10,
+  maxConnections: 5,
   callback: function (error, res, done) {
     if (error) {
       console.log(error)
     } else {
       var $ = cheerio.load(res.body, { decodeEntities: false });
-      $('#alpha .module-list a').each(function (id, ele) {
+      $('.archive .post-item a').each(function (id, ele) {
         var $ele = $(ele);
-        posts.push($ele.attr('href'));
+        posts.push(`http://pinggod.com${$ele.attr('href')}`);
       });
       done();
     }
@@ -53,28 +53,28 @@ var postsCrawler = new Crawler({
 
 // 抓取文章详情
 var contentCrawler = new Crawler({
-  maxConnections: 5,
+  maxConnections: 2,
   callback: function (error, res, done) {
     var $ = cheerio.load(res.body, { decodeEntities: false });
-    var title = $('#page-title').text();
+    var title = $('h1.post-title').text();
     bar.tick();
     // html to markdown
-    var content = toMarkdown($('#main-content').html(), {
+    var content = toMarkdown($('.post-content').html() || '', {
       converters: [
-        { // code snippet
-          filter: 'blockquote',
-          replacement: function (content) {
-            return '```' + content + '```';
-          }
-        }
+        // { // code snippet
+        //   filter: 'blockquote',
+        //   replacement: function (content) {
+        //     return '```' + content + '```';
+        //   }
+        // }
       ]
     });
 
     if (title) {
       var blog = {
         title,
-        author: $('.hentry .asset-meta .author a').text(),
-        date: $('.hentry .asset-meta .published').text(),
+        author: 'PING4GOD',
+        date: $('.post-info').text(),
         link: res.request.uri.href,
         content,
         dislike: false
@@ -86,16 +86,16 @@ var contentCrawler = new Crawler({
 });
 
 function start() {
-  postsCrawler.queue('http://www.ruanyifeng.com/blog/javascript/');
+  postsCrawler.queue('http://pinggod.com/archives/');
 
   postsCrawler.on('drain', function () {
     total = posts.length;
-    bar = new ProgressBar('阮一峰的网络日志: [:bar] :current/:total', { total: total });
+    bar = new ProgressBar('PING4GOD: [:bar] :current/:total', { total: total });
     contentCrawler.queue(posts);
   });
 
   contentCrawler.on('drain', function () {
-    if(bar.complete){
+    if (bar.complete) {
       console.log(`✅ 成功: ${success}, ❌ 失败: ${fail}\n`)
     }
   });
