@@ -1,0 +1,12 @@
+{
+  "name": "my_fe_world",
+  "version": "1.0.0",
+  "description": "我的前端聚合站",
+  "main": "index.js",
+  "author": "liuzhiyuan",
+  "license": "MIT",
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.2",
+    "crawler": "^1.0.5"
+  }
+}
